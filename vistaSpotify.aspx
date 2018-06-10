@@ -14,12 +14,11 @@
 				</ul>
 			</div>
 			<div>
-				<audio controls>
-  					<source src="musica\01-I.mp3" type="audio/ogg">
-					Tu navegador no puede reproducir esta música.
-				</audio>
 				<h3>Lista de reproduccion</h3>
 				<ul runat="server" id="lirep"></ul>
+				<audio runat="server" id="reproductor" controls>
+					Tu navegador no puede reproducir esta música.
+				</audio>
 			</div>
 		</form>
 	</body>
