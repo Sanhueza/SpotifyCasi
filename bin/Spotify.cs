@@ -13,13 +13,12 @@ public class Spotify: Page{
   protected List<cancion> lirep = new List<cancion>();//lista de reproducción
   protected HtmlGenericControl limus;//lista donde se ve la música en la vista
 
-  protected void Page_Load(){
+  protected void Page_Init(object sender, EventArgs e){
     miBase();
   }
 
-  void agregar(object sender, EventArgs e){
-    Response.Write("<p>"+sender.ToString()+"</p>");
-    Console.Write("asdfghjgfdsasdfgh");
+  public void agregar(object sender, EventArgs e){
+    Response.Write("<p>asdfghjgfdsasdfgh</p>");
   }
 
   public void miBase(){
@@ -44,8 +43,14 @@ public class Spotify: Page{
         //Esta parte hace la lista
         HtmlGenericControl li = new HtmlGenericControl("li");
         li.Attributes.Add("id", registros["mus_id"].ToString());
-        li.InnerHtml = "<asp:LinkButton runat='server' OnClick='agregar' id='"+registros["mus_id"].ToString()+"'>"+registros["mus_nombre"].ToString()+"</asp:LinkButton>";
+        LinkButton botonesA = new LinkButton();
+        botonesA.Text = registros["mus_nombre"].ToString();
+        botonesA.ID = "li"+registros["mus_id"].ToString();
+        botonesA.Click += new System.EventHandler(agregar);
+        li.Controls.Add(botonesA);
+        //li.InnerHtml = "<asp:LinkButton runat='server' OnClick='agregar' id='li"+registros["mus_id"].ToString()+"'>"+registros["mus_nombre"].ToString()+"</asp:LinkButton>";
         limus.Controls.Add(li);
+
 
         //Response.Write("<h1>"+registros["mus_nombre"].ToString()+"</h1>");
       }
