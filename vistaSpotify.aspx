@@ -4,6 +4,14 @@
 	<head>
 		<title>Spotify pero no</title>
 		<meta charset="utf-8">
+		<script language="javascript" type="text/javascript">
+			function errorAdd(){
+				alert("Esta cancion ya se encuentra en la playlist");
+			}
+			function addCancion(){
+				alert("Cancion agregada con exito");
+			}
+		</script>
 	</head>
 	<body>
 		<form action=? runat="server" method="post">

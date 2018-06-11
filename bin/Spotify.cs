@@ -21,14 +21,42 @@ public class Spotify: Page{
 
   //Solo llega agregar una canción porque cuando se vuelve a seleccionar algo carga toda la página de nuevo, por lo demás funciona
   public void agregar(object sender, EventArgs e){
-    LinkButton idcan=sender as LinkButton;//idcan es la canción seleccionada
-    foreach (cancion canci in mus){//recorremos la lista para buscar la canción
-      if(canci.id==idcan.ID){
-        rep.Add(canci);//se agrega a la lista reproducción
-        cambiarCancion(canci);//se cambia la canción en el reproductor
+    try{
+      LinkButton idcan=sender as LinkButton;//idcan es la canción seleccionada
+      foreach (cancion canci in mus){//recorremos la lista para buscar la canción
+        if(canci.id==idcan.ID){
+          rep.Add(canci);//se agrega a la lista reproducción
+          cambiarCancion(canci);//se cambia la canción en el reproductor
+          // Ahora se procede a insertar la cancion en la playlist
+          string datab = "Server=127.0.0.1;Database=prufi;Uid=root;Pwd='';sslmode=none";
+          MySqlConnection dba = new MySqlConnection(datab);
+          dba.Open();
+          string validar = "select * from music_play where musica_id = "+canci.id+" and playlist_id = 1";
+          MySqlCommand comando = new MySqlCommand(validar, dba); 
+          MySqlDataReader readerValidar = comando.ExecuteReader();  
+          bool noExiste = true;
+          // Se busca si la cancion ya se encuentra registrada en la playlist
+          while(readerValidar.Read()){
+            noExiste = false;
+          }
+          readerValidar.Close();
+          // En caso de que no se encuentre registrada se agrega a la playlist
+          if(noExiste){
+            string insertar = "insert into music_play (musica_id, playlist_id) values ("+canci.id+",1)"; 
+            comando = new MySqlCommand(insertar, dba); 
+            MySqlDataReader readerInsert = comando.ExecuteReader();  
+            readerInsert.Close();
+            cargarReproduccion();//se agrega a la lista visual de reproducción
+            Page.ClientScript.RegisterStartupScript(GetType(),"errorAdd","addCancion()",true); //Ejecuta la funcion js addCancion() en el archivo vistaSpotify.aspx
+          }else{
+            Page.ClientScript.RegisterStartupScript(GetType(),"errorAdd","errorAdd()",true); // Ejecuta la funcion js errorAdd() en el archivo vistaSpotify.aspx
+          }
+          dba.Close();
+        }
       }
+    }catch(MySqlException ex){
+      Response.Write(ex.ToString());
     }
-    cargarReproduccion();//se agrega a la lista visual de reproducción
   }
 
   public void cambiarCancion(cancion tocando){//cambia la canción que está puesta en el reproductor
@@ -93,6 +121,22 @@ public class Spotify: Page{
         li.Controls.Add(botonesA);
         limus.Controls.Add(li);
       }
+      registros.Close();
+      miSql = "select mus_id, mus_nombre, mus_url from musica left join music_play on mus_id = musica_id where playlist_id = 1 group by mus_id";
+      MySqlCommand comando = new MySqlCommand(miSql,conexion);
+      MySqlDataReader playlist = comando.ExecuteReader();
+      while(playlist.Read()){
+        //Esto busca todas la canciones de la lista principal
+        cancion c = new cancion(playlist["mus_id"].ToString(),playlist["mus_nombre"].ToString(),playlist["mus_url"].ToString());
+        HtmlGenericControl li = new HtmlGenericControl("li");
+        LinkButton tocar = new LinkButton();
+        tocar.Text = c.nombre;
+        tocar.ID = "cancion"+c.id;
+        tocar.Click += new System.EventHandler(quitar);
+        li.Controls.Add(tocar);
+        lirep.Controls.Add(li);
+      }
+      conexion.Close();
     }catch(MySqlException ex){
       Response.Write(ex.ToString());
     }
